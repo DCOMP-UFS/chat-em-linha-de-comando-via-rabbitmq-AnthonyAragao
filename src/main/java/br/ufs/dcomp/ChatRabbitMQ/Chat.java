@@ -15,9 +15,9 @@ public class Chat {
 
     public static void main(String[] argv) throws Exception {
         ConnectionFactory factory = new ConnectionFactory();
-        factory.setHost("107.23.179.55"); // Alterar
-        factory.setUsername("admin"); // Alterar
-        factory.setPassword("password"); // Alterar
+        factory.setHost("34.203.214.67"); 
+        factory.setUsername("admin"); 
+        factory.setPassword("password"); 
         factory.setVirtualHost("/");
         Connection connection = factory.newConnection();
         channel = connection.createChannel();
