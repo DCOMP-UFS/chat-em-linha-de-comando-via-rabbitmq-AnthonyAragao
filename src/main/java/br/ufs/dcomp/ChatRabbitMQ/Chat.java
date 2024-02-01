@@ -11,11 +11,14 @@ public class Chat {
 
     private static String currentUser = "";  // Armazenar o nome do usuário atual
     private static String currentRecipient = "";  // Armazenar o destinatário atual
+    private static String currentExchange = "";  // Armazenar o exchange
+    private static String currentGroup = "";  
+    private static boolean sendToGroup = false;  // Indica se a mensagem deve ser enviada para o grupo
     private static Channel channel;
 
     public static void main(String[] argv) throws Exception {
         ConnectionFactory factory = new ConnectionFactory();
-        factory.setHost("34.203.214.67"); 
+        factory.setHost("54.235.34.156"); 
         factory.setUsername("admin"); 
         factory.setPassword("password"); 
         factory.setVirtualHost("/");
@@ -46,14 +49,82 @@ public class Chat {
                 // Mudar para outro usuário
                 currentRecipient = userInput.substring(1);
                 printRecipientPrompt();
-            } else {
-                // Enviar mensagem para a fila
-                String message = "(" + getCurrentTimestamp() + ") " + currentUser + " diz: " + userInput;
-                channel.basicPublish("", currentRecipient, null, message.getBytes("UTF-8"));
+                sendToGroup = false;
+                
+            } else if (userInput.startsWith("!")) {
+                tratarComando(userInput, channel, queueName);
                 printRecipientPrompt();
+                
+            } else if (userInput.startsWith("#")) {
+                currentGroup = userInput.substring(1);
+                printGroupPrompt();
+                sendToGroup = true;
+                
+            } else {
+                if(sendToGroup){
+                    // Enviar mensagem para o grupo
+                    String message = "(" + getCurrentTimestamp() + ") " + currentUser + " diz: " + userInput;
+                    channel.basicPublish("amigos", "", null, message.getBytes("UTF-8"));
+                    printGroupPrompt();
+                }else{
+                    // Enviar mensagem para a fila
+                    String message = "(" + getCurrentTimestamp() + ") " + currentUser + " diz: " + userInput;
+                    channel.basicPublish("", currentRecipient, null, message.getBytes("UTF-8"));
+                    printRecipientPrompt();
+                }
+              
+                
             }
         }
     }
+    
+    
+    private static void tratarComando(String comando, Channel channel, String queueName){
+        String arrayComando[] = comando.split(" ");
+        String chamada = arrayComando[0].substring(1);
+        
+        // !addGroup amigos 
+        if (chamada.equals("addGroup")) {
+            
+            try {
+                String nomeDaFila = arrayComando[1];
+                
+                channel.exchangeDeclare(nomeDaFila, "fanout"); // Crio o grupo para enviar a mensagem para todas as filas
+                channel.queueBind(queueName, nomeDaFila, ""); //  para não criar um grupo com nenhum particante, Ao criar o grupo, faço o bind com a fila atual
+                
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+            
+        } else if(chamada.equals("delFromGroup")){
+            
+            try {
+                channel.queueUnbind(arrayComando[1], arrayComando[2], ""); // Corrigido para queueUnbind
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+            
+            
+        } else if(chamada.equals("removeGroup")){
+            
+            try {
+                channel.exchangeDelete(arrayComando[1]); // Deleta o exchange
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+            
+        
+        } else if(chamada.equals("addUser")){
+            try {
+                channel.queueBind(arrayComando[1], arrayComando[2], "");
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+        
+        
+    };
+    
 
     private static String createQueue(String user, Channel channel) throws IOException {
         String queueName = user;
@@ -67,6 +138,10 @@ public class Chat {
 
     private static void printRecipientPrompt() {
         System.out.print("@" + currentRecipient + ">> ");
+    }
+    
+    private static void printGroupPrompt() {
+        System.out.print("#" + currentGroup + ">> ");
     }
 
     private static String getCurrentTimestamp() {

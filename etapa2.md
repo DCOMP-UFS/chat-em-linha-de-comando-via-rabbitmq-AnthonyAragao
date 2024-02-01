@@ -91,3 +91,28 @@ Para excluir um grupo, deve-se adotar o comando "removeGroup" seguido do <nome d
 ```
 O efeito do comando "removeGroup" deve ser refletido no RabbitMQ como a exclusão do respectivo exchange.
 
+
+
+
+fila nao funciona pois vai entregar para apenas um, isso no rabbitmq
+solução: exchange fanout
+
+tem as filas do usuario e cada fila vai ser vinculada a esse exchange
+ou seja, cada exchange vai ser um grupo e nesse exchange eu vinculo os usuarios
+
+se esse exchange estiver vinculado a 5 filas de usuarios
+ao enviar uma mensagem nesse exchange automaticamente ja enviaria para cada fila dos usuarios
+
+
+
+
+
+https://javadoc.io/doc/com.rabbitmq/amqp-client/5.7.3/com/rabbitmq/client/Channel.html
+queueDeclare() -> declarar a fila
+
+exchangeDeclare -> declarar o exchange
+
+basicPublish -> publica a mensagem
+type fanout para o broodcast
+
+queueBind -> faz o bind do exchange com a fila
