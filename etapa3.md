@@ -1,7 +1,6 @@
 ## Envio de arquivos
 
 O chat deve disponibilizar o comando "upload" para permitir que um usuário envie arquivos (de qualquer tipo) para um usuário ou grupo corrente. 
-
 Exemplo do envio do arquivo "aula1.pdf" para o usuário "marciocosta":
 
 ```
@@ -19,7 +18,12 @@ Logo depois de chamado o comando "upload", deve ser exibida a mensagem (não blo
 Enviando "/home/tarcisio/aula1.pdf" para @marciocosta.
 @marciocosta>>
 ```
-Observe também que no exemplo acima, logo depois de exibida a mensagem ```Enviando "/home/tarcisio/aula1.pdf" para @marciocosta``` o chat volta instantaneamente para o prompt (ex: "@marciocosta>> "), ou seja, o processo de envio de arquivos com o comando "upload" deve ser feita em background (sem bloquear o chat). Para que isso seja possível, é necessário criar uma thread no chat emissor para cada novo upload. Também pode ser necessário criar uma fila específica para o recebimento de arquivos para cada usuário. Com isso, cada usuário teria uma fila para o recebimento de mensagens de texto e outra para o recebimento de arquivos.
+
+Observe também que no exemplo acima, logo depois de exibida a mensagem ```Enviando "/home/tarcisio/aula1.pdf" para @marciocosta``` 
+o chat volta instantaneamente para o prompt (ex: "@marciocosta>> "), ou seja, o processo de envio de arquivos com o comando "upload" deve ser feita em background (sem bloquear o chat). 
+Para que isso seja possível, é necessário criar uma thread no chat emissor para cada novo upload. Também pode ser necessário criar uma fila específica para o recebimento de arquivos para cada usuário. 
+Com isso, cada usuário teria uma fila para o recebimento de mensagens de texto e outra para o recebimento de arquivos.
+
 
 Depois que o arquivo for transferido do chat emissor para o servidor do RabbitMQ, deve ser exibida a mensagem ```Arquivo "<nome-do-arquivo>" foi enviado para @<id-do-receptor>``` Exemplo:
 
